@@ -7,7 +7,9 @@
     "importHelpers": true,
     "moduleResolution": "node",
     "esModuleInterop": true,
+    "experimentalDecorators": true,
     "allowSyntheticDefaultImports": true,
+    "outDir" : "./js",
     "sourceMap": true,
     "baseUrl": ".",
     "types": [
