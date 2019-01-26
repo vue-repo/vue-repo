@@ -27,6 +27,24 @@ describe('crud repository: localAdd', () => {
     testRepository.deleteAdded(item)
     expect(testRepository.localListIndex(item)).equals(-1);
   });
+  it('deleteAdded(1) should clear active if 1 is active', async () => {
+    const item = newItem()
+    await testRepository.updateList();
+    testRepository
+        .addLocal(item)
+        .activate(item)
+        .deleteAdded(item)
+    expect(testRepository.active).is.undefined;
+  });
+  it('deleteAdded(1) should not clear active if 1 is not active', async () => {
+    const item = newItem()
+    await testRepository.updateList();
+    testRepository
+        .addLocal(item)
+        .activateLast()
+        .deleteAdded(item)
+    expect(testRepository.active).equals(testRepository.last);
+  });
   it('deleteAllAdded should delete all added items from localList', async () => {
     const item = newItem(),
       item2 = newItem()

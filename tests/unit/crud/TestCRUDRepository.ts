@@ -1,33 +1,43 @@
-import {AbstractCRUDRepository, IWithId} from '@/base_repositories/AbstractCRUDRepository';
+import {AbstractCRUDRepository, IId, IWithId} from '@/base_repositories/AbstractCRUDRepository';
 import {Api} from './Api';
 
 export class TestCRUDRepository<T extends IWithId> extends AbstractCRUDRepository<T> {
-    async sendAddReq() {
-        return Api.sendAddReq<T>()
+    public addMiddlewares = []
+    public deleteMiddlewares = []
+    public deleteByIdMiddlewares = []
+    public editMiddlewares = []
+    public editBatchMiddlewares = []
+    public getMiddlewares = []
+    public listMiddlewares = []
+    
+    async sendAddReq(instance: T) {
+        const resp = await Api.sendAddReq<T>(instance)
+        this.addMiddlewares.forEach(mw => mw(resp))
+        return resp
     }
 
-    async sendDeleteByIdReq() {
-        return Api.sendDeleteByIdReq()
+    async sendDeleteReq(instance: T) {
+        const resp = await Api.sendDeleteReq<T>(instance)
+        this.deleteMiddlewares.forEach(mw => mw(resp))
+        return resp
     }
 
-    async sendDeleteReq() {
-        await Api.sendDeleteReq()
+    async sendEditReq(instance: T) {
+        const resp = await Api.sendEditReq<T>(instance)
+        this.editMiddlewares.forEach(mw => mw(resp))
+        return resp
     }
 
-    async sendEditBatchReq() {
-        return Api.sendEditBatchReq<T>()
-    }
-
-    async sendEditReq() {
-        return Api.sendEditReq<T>()
-    }
-
-    async sendGetReq(id: number) {
-        return Api.sendGetReq<T>(id)
+    async sendGetReq(id: IId) {
+        const resp = await Api.sendGetReq<T>(id)
+        this.getMiddlewares.forEach(mw => mw(resp))
+        return resp
     }
 
     async sendListReq() {
-        return Api.sendListReq<T>()
+        const resp = await Api.sendListReq<T>()
+        this.listMiddlewares.forEach(mw => mw(resp))
+        return resp
     }
 
 }

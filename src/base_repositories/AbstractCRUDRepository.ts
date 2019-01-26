@@ -106,6 +106,14 @@ export abstract class AbstractCRUDRepository<T extends IWithId> extends StoreMod
     }
   }
   @Getter()
+  public get first () {
+    return this.localListFirstItem
+  }
+  @Getter()
+  public get last () {
+    return this.localListLastItem
+  }
+  @Getter()
   public get localListFirstItem () {
     return this.localListItemByIndex(0)
   }
@@ -231,7 +239,7 @@ export abstract class AbstractCRUDRepository<T extends IWithId> extends StoreMod
   }
   @Getter()
   public get isActiveById () {
-    return (id: string | number) => this.active !== undefined && this.active.id === id
+    return (id: string | number) => this.hasActive && this.active.id === id
   }
   @Getter()
   public get listIds () :Array<IId> {
@@ -256,7 +264,7 @@ export abstract class AbstractCRUDRepository<T extends IWithId> extends StoreMod
   @State()
   public list: T[] | undefined
   @State()
-  public active: T | undefined
+  public active: T
   @State()
   public activeInitialCopy: T | undefined
   // ----------- Constructor ------------
@@ -280,6 +288,21 @@ export abstract class AbstractCRUDRepository<T extends IWithId> extends StoreMod
     return this
   }
   @Mutation()
+  public activateFirst () :this {
+    this.activate(this.localListFirstItem)
+    return this
+  }
+  @Mutation()
+  public activateLast () :this {
+    this.activate(this.localListLastItem)
+    return this
+  }
+  @Mutation()
+  public activateByIndex (index: number) :this {
+    this.activate(this.localListItemByIndex(index))
+    return this
+  }
+  @Mutation()
   public activateInstead (insteadInstance: T, instanceToActivate: T) :this {
     if (this.isActive(insteadInstance)) this.activate(instanceToActivate)
     return this
@@ -294,10 +317,9 @@ export abstract class AbstractCRUDRepository<T extends IWithId> extends StoreMod
     if (this.isActive(instance)) this.deactivate()
     return this
   }
-
   @Mutation()
   public resetActiveToInitialState () :this {
-    if (this.active === undefined) return this
+    this.throwErrorIfHasntActive()
     const activeInitialCopyClone = _cloneDeep(this.activeInitialCopy as T)
     this.smartReplace(this.active, activeInitialCopyClone)
     this.activate(activeInitialCopyClone)
@@ -318,7 +340,10 @@ export abstract class AbstractCRUDRepository<T extends IWithId> extends StoreMod
   @Mutation()
   public deleteAdded (instance: T) :this {
     const index = this.addedIndex(instance)
-    if (index !== -1) this.added.splice(index, 1)
+    if (index !== -1) {
+      this.deactivateIfActive(instance)
+      this.added.splice(index, 1)
+    }
     return this
   }
   @Mutation()
@@ -351,14 +376,8 @@ export abstract class AbstractCRUDRepository<T extends IWithId> extends StoreMod
     return this
   }
   @Mutation()
-  public deleteActiveFromList () :this {
-    if (this.active === undefined) return this
-    this.deleteFromList(this.active)
-    return this
-  }
-  @Mutation()
   public deleteActiveLocal () :this {
-    if (this.active === undefined) return this
+    this.throwErrorIfHasntActive()
     this.deleteLocal(this.active)
     return this
   }
@@ -394,16 +413,15 @@ export abstract class AbstractCRUDRepository<T extends IWithId> extends StoreMod
       : await this.sendEditReq(instance)
     return resp
   }
-  abstract async sendAddReq (...props: any[]) :Promise<T>
-  abstract async sendEditReq (...props: any[]) :Promise<T>
-  abstract async sendEditBatchReq (...props: any[]) :Promise<T>
-  abstract async sendDeleteReq (...props: any[]) :Promise<void>
-  abstract async sendDeleteByIdReq (...props: any[]) :Promise<void>
+  abstract async sendAddReq (instance: T, ...props: any[]) :Promise<T>
+  abstract async sendEditReq (instance: T, ...props: any[]) :Promise<T>
+  abstract async sendDeleteReq (instance: T, ...props: any[]) :Promise<void>
   abstract async sendListReq (...props: any[]) :Promise<T[]>
-  abstract async sendGetReq (...props: any[]) :Promise<T>
+  abstract async sendGetReq (id: IId, ...props: any[]) :Promise<T>
   // Flush
   @Action()
   public async flushAdded (instance: T) :Promise<T> {
+    if (!this.isAdded(instance)) throw new Error('Item is not added locally')
     const resp = await this.sendAddReq(instance)
     this.deleteAdded(instance)
     this.addToList(resp)
@@ -420,19 +438,11 @@ export abstract class AbstractCRUDRepository<T extends IWithId> extends StoreMod
   }
   @Action()
   public async flushEdited (instance: T) :Promise<T> {
+    if (!this.isEdited(instance)) throw new Error('Item is not edited locally')
     const resp = await this.sendEditReq(instance)
     this.deleteEdited(instance)
     this.editInList(resp)
     this.activateInstead(instance, resp)
-    return resp
-  }
-  @Action()
-  public async flushEditedBatch (instances: T[]) :Promise<T> {
-    const resp = await this.sendEditBatchReq(instances)
-    instances.forEach(instance => {
-      this.deleteEdited(instance)
-      this.editInList(instance)
-    })
     return resp
   }
   @Action()
@@ -444,11 +454,8 @@ export abstract class AbstractCRUDRepository<T extends IWithId> extends StoreMod
     )
   }
   @Action()
-  public async flushAllEditedBatch () :Promise<T> {
-    return await this.flushEditedBatch(this.edited)
-  }
-  @Action()
   public async flushDeleted (instance: T) :Promise<void> {
+    if (!this.isDeleted(instance)) throw new Error('Item is not deleted locally')
     await this.sendDeleteReq(instance)
     this.deleteDeleted(instance)
     this.deleteFromList(instance)
@@ -478,8 +485,8 @@ export abstract class AbstractCRUDRepository<T extends IWithId> extends StoreMod
   }
   @Action()
   public async addAndActivate (instance: T) :Promise<T> {
-    const resp = this.add(instance)
-    this.activate(instance)
+    const resp = await this.add(instance)
+    this.activate(resp)
     return resp
   }
   @Action()
@@ -504,7 +511,7 @@ export abstract class AbstractCRUDRepository<T extends IWithId> extends StoreMod
   }
   @Action()
   public async upsertActive () :Promise<T | undefined> {
-    if (this.active === undefined) return
+    this.throwErrorIfHasntActive()
     return await this.upsert(this.active)
   }
   @Action()
@@ -514,17 +521,8 @@ export abstract class AbstractCRUDRepository<T extends IWithId> extends StoreMod
     this.deactivateIfActive(instance)
   }
   @Action()
-  public async deleteBatch (instances: T[]) :Promise<void> {
-    const ids = instances.map(d => d.id)
-    await this.sendDeleteByIdReq(ids)
-    instances.forEach(instance => {
-      this.deleteFromList(instance)
-      this.deactivateIfActive(instance)
-    })
-  }
-  @Action()
   public async deleteActive () :Promise<void> {
-    if (this.active === undefined) return
+    this.throwErrorIfHasntActive()
     return await this.delete(this.active)
   }
   @Action()
@@ -544,7 +542,8 @@ export abstract class AbstractCRUDRepository<T extends IWithId> extends StoreMod
   }
   @Action()
   public async smartUpsertActive () {
-    return this.active === undefined ? undefined : await this.smartUpsert(this.active)
+    this.throwErrorIfHasntActive()
+    return await this.smartUpsert(this.active)
   }
   @Action()
   public async smartDelete (instance: T) :Promise<void> {
@@ -557,7 +556,7 @@ export abstract class AbstractCRUDRepository<T extends IWithId> extends StoreMod
   }
   @Action()
   public async smartDeleteActive () :Promise<void> {
-    if (this.active === undefined) return
+    this.throwErrorIfHasntActive()
     await this.smartDelete(this.active)
   }
   @Action()
@@ -575,7 +574,7 @@ export abstract class AbstractCRUDRepository<T extends IWithId> extends StoreMod
   }
   // Get
   @Action()
-  public async getAndActivate (id: string | number) :Promise<T> {
+  public async getAndActivate (id: IId) :Promise<T> {
     const resp = await this.sendGetReq(id)
     this.activate(resp)
     return resp
@@ -587,9 +586,9 @@ export abstract class AbstractCRUDRepository<T extends IWithId> extends StoreMod
     return resp
   }
   @Action()
-  public async refreshItemById (id: string) {
+  public async refreshItemById (id: IId) {
     const item = this.localListItemById(id)
-    if (item === undefined) return
+    if (item === undefined) throw new Error(`There is no item with id ${id} in localList`)
     return await this.refreshItem(item)
   }
   // Other methods
@@ -598,14 +597,14 @@ export abstract class AbstractCRUDRepository<T extends IWithId> extends StoreMod
     return _concat(this.added, withoutDeleted.map(item => this.isEditedById(item.id) ? this.editedById(item.id) : item))
   }
   protected addToList (instance: T) :this {
-    if (this.list === undefined) return this
+    this.throwErrorIfHasntList()
     this.list.unshift(instance)
     return this
   }
   protected editInList (instance: T) :this {
-    if (this.list === undefined) return this
-    const index = this.listIndex(instance)
-    if (index === undefined) return this
+    this.throwErrorIfHasntList()
+    const index = this.listIndexById(instance.id)
+    if (index === -1) throw new Error(`There is no instance with id ${instance.id} in list`)
     this.list.splice(index, 1, instance)
     return this
   }
@@ -615,6 +614,11 @@ export abstract class AbstractCRUDRepository<T extends IWithId> extends StoreMod
     if (this.list !== undefined) {
       this.list.splice(index, 1)
     }
+    return this
+  }
+  protected deleteActiveFromList () :this {
+    this.throwErrorIfHasntActive()
+    this.deleteFromList(this.active)
     return this
   }
   protected smartReplace (replaceableInstance: T, replacingInstance: T) :this {
@@ -655,7 +659,9 @@ export abstract class AbstractCRUDRepository<T extends IWithId> extends StoreMod
     return this
   }
   protected throwErrorIfHasntList () {
-    if (this.list === undefined) throw new Error('list === undefined')
+    if (this.list === undefined) throw new Error('There is no list')
   }
-
+  protected throwErrorIfHasntActive () {
+    if (this.list === undefined) throw new Error('There is no active item')
+  }
 }

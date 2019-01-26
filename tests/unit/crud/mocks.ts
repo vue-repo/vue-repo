@@ -1,3 +1,5 @@
+import {IId} from '@/base_repositories/AbstractCRUDRepository';
+
 export const list = () => {
     return [
         {
@@ -24,8 +26,8 @@ export const add = () => {
 
 export const edit = () => {
     return {
-        id: 3,
-        name: 'editedThird'
+        id: 1,
+        name: 'editedFirst'
     }
 }
 
@@ -37,13 +39,20 @@ export const editBatch = () => [
     }
 ]
 
-export const get = (id: number) => {
+export const get = (id: IId) => {
     return list().find(d => d.id === id)
 }
 
 export const newItem = () => {
     return {
         id: 5,
+        name: 'newItem'
+    }
+}
+
+export const newItemWithoutId = () => {
+    return {
+        id: null,
         name: 'newItem'
     }
 }

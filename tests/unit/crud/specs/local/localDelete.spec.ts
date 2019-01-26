@@ -16,6 +16,29 @@ describe('crud repository: localDelete', () => {
     expect(testRepository.localListFirstItem).not.equals(item);
     expect(testRepository.listFirstItem).equals(item);
   });
+  it('deleteLocal(1) should clear active if 1 is active', async () => {
+    await testRepository.updateList();
+    testRepository
+        .activateFirst()
+        .deleteLocal(testRepository.first)
+    expect(testRepository.active).is.undefined;
+  });
+  it('deleteLocal(1) should not clear active if 1 is not active', async () => {
+    await testRepository.updateList();
+    testRepository
+        .activateLast()
+        .deleteLocal(testRepository.first)
+    expect(testRepository.active).equals(testRepository.last);
+  });
+  it('deleteActiveLocal should delete active item from localList but not in list', async () => {
+    await testRepository.updateList();
+    const item = testRepository.listFirstItem
+    testRepository
+        .activateFirst()
+        .deleteActiveLocal()
+    expect(testRepository.localListFirstItem).not.equals(item);
+    expect(testRepository.listFirstItem).equals(item);
+  });
   it('deleteDeleted should delete reset item state in localList', async () => {
     await testRepository.updateList();
     const item = testRepository.listFirstItem

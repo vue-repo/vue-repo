@@ -1,4 +1,5 @@
 import {add, edit, editBatch, get, list} from './mocks';
+import {IId} from '@/base_repositories/AbstractCRUDRepository';
 
 export class Api {
     static sendListReq<T> () :Promise<T[]> {
@@ -6,32 +7,22 @@ export class Api {
             resolve(list() as any)
         })
     }
-    static sendAddReq<T> () :Promise<T> {
+    static sendAddReq<T> (instance: T) :Promise<T> {
         return new Promise((resolve) => {
             resolve(add() as any)
         })
     }
-    static sendDeleteReq () :Promise<void> {
+    static sendDeleteReq<T> (instance: T) :Promise<void> {
         return new Promise((resolve) => {
-            resolve()
+            resolve(200 as any)
         })
     }
-    static sendDeleteByIdReq () :Promise<void> {
-        return new Promise((resolve) => {
-            resolve()
-        })
-    }
-    static sendEditReq<T> () :Promise<T> {
+    static sendEditReq<T> (instance: T) :Promise<T> {
         return new Promise((resolve) => {
             resolve(edit() as any)
         })
     }
-    static sendEditBatchReq<T> () :Promise<T> {
-        return new Promise((resolve) => {
-            resolve(editBatch() as any)
-        })
-    }
-    static sendGetReq<T> (id: number) :Promise<T> {
+    static sendGetReq<T> (id: IId) :Promise<T> {
         return new Promise((resolve) => {
             resolve(get(id) as any)
         })
