@@ -80,7 +80,7 @@
             // Change its name
             taskRepo.first.name = 'new-saved-task'
             // Save to server and change object by response
-            await taskRepo.syncAdded(taskRepo.first)
+            await taskRepo.flushAdded(taskRepo.first)
 
             // -- Case 5 --
             // Add new task local
