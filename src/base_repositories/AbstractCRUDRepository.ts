@@ -407,64 +407,64 @@ export abstract class AbstractCRUDRepository<T extends IWithId> extends StoreMod
   }
   // Send requests
   @Action()
-  public async sendUpsertReq (instance: T) :Promise<any> {
+  public async sendUpsertReq (instance: T, ...params: any[]) :Promise<any> {
     const resp = _isNil(instance.id)
-      ? await this.sendAddReq(instance)
-      : await this.sendEditReq(instance)
+      ? await this.sendAddReq(instance, ...params)
+      : await this.sendEditReq(instance, ...params)
     return resp
   }
-  abstract async sendAddReq (instance: T, ...props: any[]) :Promise<T>
-  abstract async sendEditReq (instance: T, ...props: any[]) :Promise<T>
-  abstract async sendDeleteReq (instance: T, ...props: any[]) :Promise<void>
-  abstract async sendListReq (...props: any[]) :Promise<T[]>
-  abstract async sendGetReq (id: IId, ...props: any[]) :Promise<T>
+  abstract async sendAddReq (instance: T, ...params: any[]) :Promise<T>
+  abstract async sendEditReq (instance: T, ...params: any[]) :Promise<T>
+  abstract async sendDeleteReq (instance: T, ...params: any[]) :Promise<void>
+  abstract async sendListReq (...params: any[]) :Promise<T[]>
+  abstract async sendGetReq (id: IId, ...params: any[]) :Promise<T>
   // Flush
   @Action()
-  public async flushAdded (instance: T) :Promise<T> {
+  public async flushAdded (instance: T, ...params: any[]) :Promise<T> {
     if (!this.isAdded(instance)) throw new Error('Item is not added locally')
-    const resp = await this.sendAddReq(instance)
+    const resp = await this.sendAddReq(instance, ...params)
     this.deleteAdded(instance)
     this.addToList(resp)
     this.activateInstead(instance, resp)
     return resp
   }
   @Action()
-  public async flushAllAdded () :Promise<Array<T>> {
+  public async flushAllAdded (...params: any[]) :Promise<Array<T>> {
     return await Promise.all(
       this.added.map(async addedInstance => {
-        return this.flushAdded(addedInstance)
+        return this.flushAdded(addedInstance, ...params)
       })
     )
   }
   @Action()
-  public async flushEdited (instance: T) :Promise<T> {
+  public async flushEdited (instance: T, ...params: any[]) :Promise<T> {
     if (!this.isEdited(instance)) throw new Error('Item is not edited locally')
-    const resp = await this.sendEditReq(instance)
+    const resp = await this.sendEditReq(instance, ...params)
     this.deleteEdited(instance)
     this.editInList(resp)
     this.activateInstead(instance, resp)
     return resp
   }
   @Action()
-  public async flushAllEdited () :Promise<Array<T>> {
+  public async flushAllEdited (...params: any[]) :Promise<Array<T>> {
     return await Promise.all(
       this.edited.map(async editedInstance => {
-        return this.flushEdited(editedInstance)
+        return this.flushEdited(editedInstance, ...params)
       })
     )
   }
   @Action()
-  public async flushDeleted (instance: T) :Promise<void> {
+  public async flushDeleted (instance: T, ...params: any[]) :Promise<void> {
     if (!this.isDeleted(instance)) throw new Error('Item is not deleted locally')
-    await this.sendDeleteReq(instance)
+    await this.sendDeleteReq(instance, ...params)
     this.deleteDeleted(instance)
     this.deleteFromList(instance)
   }
   @Action()
-  public async flushAllDeleted () :Promise<Array<void>> {
+  public async flushAllDeleted (...params: any[]) :Promise<Array<void>> {
     return await Promise.all(
       this.deleted.map(async deletedInstance => {
-        return this.flushDeleted(deletedInstance)
+        return this.flushDeleted(deletedInstance, ...params)
       })
     )
   }
@@ -478,29 +478,29 @@ export abstract class AbstractCRUDRepository<T extends IWithId> extends StoreMod
   }
   // Remote changing. Change on server and then in list
   @Action()
-  public async add (instance: T) :Promise<T> {
-    const resp = await this.sendAddReq(instance)
+  public async add (instance: T, ...params: any[]) :Promise<T> {
+    const resp = await this.sendAddReq(instance, ...params)
     if (this.hasList) this.addToList(resp)
     return resp
   }
   @Action()
-  public async addAndActivate (instance: T) :Promise<T> {
-    const resp = await this.add(instance)
+  public async addAndActivate (instance: T, ...params: any[]) :Promise<T> {
+    const resp = await this.add(instance, ...params)
     this.activate(resp)
     return resp
   }
   @Action()
-  public async edit (instance: T) :Promise<T> {
-    const resp = await this.sendEditReq(instance)
+  public async edit (instance: T, ...params: any[]) :Promise<T> {
+    const resp = await this.sendEditReq(instance, ...params)
     if (this.hasList) this.editInList(resp)
     this.activateInstead(instance, resp)
     return resp
   }
   @Action()
-  public async upsert (instance: T) :Promise<T> {
+  public async upsert (instance: T, ...params: any[]) :Promise<T> {
     const resp = _isNil(instance.id)
-      ? this.add(instance)
-      : this.edit(instance)
+      ? this.add(instance, ...params)
+      : this.edit(instance, ...params)
     return resp
   }
   @Action()
@@ -515,43 +515,45 @@ export abstract class AbstractCRUDRepository<T extends IWithId> extends StoreMod
     return await this.upsert(this.active)
   }
   @Action()
-  public async delete (instance: T) :Promise<void> {
-    await this.sendDeleteReq(instance)
+  public async delete (instance: T, ...params: any[]) :Promise<void> {
+    await this.sendDeleteReq(instance, ...params)
     if (this.hasList) this.deleteFromList(instance)
     this.deactivateIfActive(instance)
   }
   @Action()
-  public async deleteActive () :Promise<void> {
+  public async deleteActive (...params: any[]) :Promise<void> {
     this.throwErrorIfHasntActive()
-    return await this.delete(this.active)
+    return await this.delete(this.active, ...params)
   }
   @Action()
-  public async deleteByIndex (index: number) :Promise<void> {
-    return await this.delete(this.localList[index])
+  public async deleteByIndex (index: number, ...params: any[]) :Promise<void> {
+    return await this.smartDelete(this.localList[index], ...params)
   }
   // Smart methods
   @Action()
-  public async smartUpsert (instance: T) {
+  public async smartUpsert (instance: T, ...params: any[]) {
     if (this.isAdded(instance)) {
-      return await this.flushAdded(instance)
+      return await this.flushAdded(instance, ...params)
     } else if (this.isEdited(instance)) {
-      return await this.flushEdited(instance)
+      return await this.flushEdited(instance, ...params)
     } else {
-      return await this.upsert(instance)
+      return await this.upsert(instance, ...params)
     }
   }
   @Action()
-  public async smartUpsertActive () {
+  public async smartUpsertActive (...params: any[]) {
     this.throwErrorIfHasntActive()
-    return await this.smartUpsert(this.active)
+    return await this.smartUpsert(this.active, ...params)
   }
   @Action()
-  public async smartDelete (instance: T) :Promise<void> {
+  public async smartDelete (instance: T, ...params: any[]) :Promise<void> {
     if (this.isAdded(instance)) {
       this.deleteAdded(instance)
       this.deactivateIfActive(instance)
+    } else if (this.isDeleted(instance)) {
+      await this.flushDeleted(instance, ...params)
     } else {
-      await this.delete(instance)
+      await this.delete(instance, ...params)
     }
   }
   @Action()
@@ -567,21 +569,21 @@ export abstract class AbstractCRUDRepository<T extends IWithId> extends StoreMod
   }
   // List
   @Action()
-  public async updateList (...reqParams: any[]) :Promise<T[]> {
-    const resp = await this.sendListReq(reqParams)
+  public async updateList (...params: any[]) :Promise<T[]> {
+    const resp = await this.sendListReq(params)
     this.setList(resp)
     return resp
   }
   // Get
   @Action()
-  public async getAndActivate (id: IId) :Promise<T> {
-    const resp = await this.sendGetReq(id)
+  public async getAndActivate (id: IId, ...params: any[]) :Promise<T> {
+    const resp = await this.sendGetReq(id, ...params)
     this.activate(resp)
     return resp
   }
   @Action()
-  public async refreshItem (instance: T) {
-    const resp = await this.sendGetReq(instance.id)
+  public async refreshItem (instance: T, ...params: any[]) {
+    const resp = await this.sendGetReq(instance.id, ...params)
     this.smartReplace(instance, resp)
     return resp
   }

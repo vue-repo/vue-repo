@@ -1,6 +1,10 @@
 <template>
     <content-page title="CRUD repository">
         <h2>What is CRUD repository</h2>
+        <p>
+            It's one of the built-in base repos and the most powerful.
+            Extending it you get a clever system which will be highly helpful in your crud operations.
+        </p>
     </content-page>
 </template>
 

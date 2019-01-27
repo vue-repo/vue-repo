@@ -10,6 +10,7 @@ import LocalState from '@pages/crud-repo/local-state';
 import RemoteState from '@pages/crud-repo/remote-state';
 import Synchronizing from '@pages/crud-repo/synchronizing';
 import SmartMethods from '@pages/crud-repo/smart-methods';
+import GetMethods from '@pages/crud-repo/get-methods';
 
 storiesOf('CRUD repository', module)
     .add('What is crud repository?', () => WhatIsCrudRepo)
@@ -20,3 +21,4 @@ storiesOf('CRUD repository', module)
     .add('Remote state', () => RemoteState)
     .add('Synchronizing of local and remote states', () => Synchronizing)
     .add('Smart methods', () => SmartMethods)
+    .add('"Get" methods', () => GetMethods)

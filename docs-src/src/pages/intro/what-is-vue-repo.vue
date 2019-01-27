@@ -10,31 +10,31 @@
         <v-code>
             // You can access api description from this.api
             class CRUDRepo&lt;T&gt; extends IWithId> extends AbstractCRUDRepository&lt;T&gt; {
-                async sendAddReq(instance: T) {
+                async sendAddReq(instance: T, ...params) {
                     return await ApiClient.send({
                         path: this.api.add,
                         bodyParams: instance
                     })
                 }
-                async sendDeleteReq(instance: T) {
+                async sendDeleteReq(instance: T, ...params) {
                     return await ApiClient.send({
                         path: this.api.delete,
                         urlParams: {id: instance.id}
                     })
                 }
-                async sendEditReq(instance: T) {
+                async sendEditReq(instance: T, ...params) {
                     return await ApiClient.send({
                         path: this.api.edit,
                         bodyParams: instance
                     })
                 }
-                async sendGetReq(id) {
+                async sendGetReq(id, ...params) {
                     return await ApiClient.send({
                         path: this.api.get,
                         urlParams: {id: instance.id}
                     })
                 }
-                async sendListReq() {
+                async sendListReq(...params) {
                     return await ApiClient.send({path: this.api.list})
                 }
             }
