@@ -6,7 +6,9 @@
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
     "lint": "vue-cli-service lint",
-    "test:unit": "vue-cli-service test:unit"
+    "test:unit": "vue-cli-service test:unit",
+    "storybook": "start-storybook -p 9001 -c docs/.storybook",
+    "storybook-build": "build-storybook -c .storybook -o .out"
   },
   "dependencies": {
     "@types/lodash": "^4.14.120",
@@ -14,6 +16,8 @@
     "vue": "^2.5.21"
   },
   "devDependencies": {
+    "@babel/core": "^7.2.2",
+    "@storybook/vue": "^4.1.11",
     "@types/chai": "^4.1.0",
     "@types/mocha": "^5.2.4",
     "@vue/cli-plugin-babel": "^3.3.0",
@@ -21,8 +25,18 @@
     "@vue/cli-plugin-unit-mocha": "^3.3.0",
     "@vue/cli-service": "^3.3.0",
     "@vue/test-utils": "^1.0.0-beta.20",
+    "babel-loader": "^8.0.5",
+    "babel-preset-vue": "^2.0.2",
     "chai": "^4.1.2",
+    "css-loader": "^2.1.0",
+    "node-sass": "^4.11.0",
+    "prismjs": "^1.15.0",
+    "sass-loader": "^7.1.0",
+    "style-loader": "^0.23.1",
+    "ts-loader": "^5.3.3",
     "typescript": "^3.0.0",
-    "vue-template-compiler": "^2.5.21"
+    "vue-loader": "^15.6.1",
+    "vue-prism-editor": "^0.1.2",
+    "vue-template-compiler": "^2.5.22"
   }
 }
