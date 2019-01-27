@@ -7,8 +7,8 @@
     "build": "vue-cli-service build",
     "lint": "vue-cli-service lint",
     "test:unit": "vue-cli-service test:unit",
-    "storybook": "start-storybook -p 9001 -c docs/.storybook",
-    "storybook-build": "build-storybook -c docs/.storybook -o docs/.out"
+    "storybook": "start-storybook -p 9001 -c docs-src/.storybook",
+    "storybook-build": "build-storybook -c docs-src/.storybook -o docs"
   },
   "dependencies": {
     "@types/lodash": "^4.14.120",
