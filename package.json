@@ -1,7 +1,6 @@
 {
-  "name": "vue-store",
+  "name": "vue-repo",
   "version": "0.1.0",
-  "private": true,
   "main": "index.js",
   "scripts": {
     "serve": "vue-cli-service serve",
