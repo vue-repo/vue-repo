@@ -1,3 +1,6 @@
+
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/aa75efa726f7445a89a461b4da83fded)](https://app.codacy.com/app/rrodionov91/vue-repo?utm_source=github.com&utm_medium=referral&utm_content=vue-repo/vue-repo&utm_campaign=Badge_Grade_Settings)
+
 It's modular, easy-scalable, class-based, reactive state-management implementation, written on typescript. And it has several base classes from the box which will simplify your work and significantly reduce the routine.
 https://vue-repo.github.io/vue-repo/
 
