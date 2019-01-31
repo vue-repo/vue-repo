@@ -1,6 +1,6 @@
 <template>
     <content-page title="Introduction">
-        <h2>What is vue-repo?</h2>
+        <h2>Quick start</h2>
         <p>
             It's modular, easy-scalable, class-based, reactive state-management implementation, written on typescript.
             And it has several base classes from the box which will simplify your work and significantly reduce the routine.
@@ -60,6 +60,7 @@
             taskRepo.list // list of tasks
 
             // -- Case 2 --
+            await taskRepo.updateList()
             // Activate first task
             taskRepo.activateFirst()
             taskRepo.hasActive // true
@@ -88,6 +89,24 @@
             // Delete all local-added tasks
             taskRepo.deleteAllAdded()
 
+            // -- Case 6 --
+            await taskRepo.updateList()
+            // Activate item by index
+            taskRepo.activateByIndex(2)
+            taskRepo.active // {id: 2, name: 'Name'}
+            taskRepo.listItemByIndex(2) // {id: 2, name: 'Name'}
+            taskRepo.isActiveChangedAfterActivation // false
+            // Edit active item
+            taskRepo.active.name = 'Edited name'
+            taskRepo.active // {id: 2, name: 'Edited name'}
+            taskRepo.listItemByIndex(2) // {id: 2, name: 'Edited name'}
+            taskRepo.isActiveChangedAfterActivation // true
+            taskRepo.activeInitialCopy // {id: 2, name: 'Name'}
+            // Reset active item to last saved state
+            taskRepo.resetActiveToInitialState()
+            taskRepo.active // {id: 2, name: 'Name'}
+            taskRepo.listItemByIndex(2) // {id: 2, name: 'Name'}
+            taskRepo.isActiveChangedAfterActivation // false
         </v-code>
     </content-page>
 </template>
