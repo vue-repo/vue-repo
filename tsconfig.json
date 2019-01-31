@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    "declaration": true,
     "target": "esnext",
     "module": "esnext",
     "jsx": "preserve",
@@ -8,7 +9,7 @@
     "esModuleInterop": true,
     "experimentalDecorators": true,
     "allowSyntheticDefaultImports": true,
-    "outDir" : "./js",
+    "outDir" : "./dist",
     "sourceMap": true,
     "baseUrl": ".",
     "types": [

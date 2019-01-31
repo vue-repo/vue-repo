@@ -4,8 +4,8 @@ import _isEmpty from 'lodash/isEmpty'
 import _isNil from 'lodash/isNil'
 import _isEqual from 'lodash/isEqual'
 import _keyBy from 'lodash/keyBy'
-import {StoreModule} from '@/StoreModule/StoreModule';
-import {Action, Getter, Mutation, State} from '@/StoreModule/annotations';
+import {StoreModule} from '../StoreModule/StoreModule';
+import {Action, Getter, Mutation, State} from '../StoreModule/annotations';
 
 export type IId = string | number
 

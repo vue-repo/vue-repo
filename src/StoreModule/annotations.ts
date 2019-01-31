@@ -1,4 +1,4 @@
-import {actionMiddlewares, getterMiddlewares, mutationMiddlewares, stateMiddlewares} from '@/StoreModule/middlewares';
+import {actionMiddlewares, getterMiddlewares, mutationMiddlewares, stateMiddlewares} from './middlewares';
 
 export interface IGetterOptions {}
 export interface IStateOptions {}

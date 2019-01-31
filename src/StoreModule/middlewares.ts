@@ -1,5 +1,5 @@
 import _merge from 'lodash/merge';
-import {IActionOptions, IGetterOptions, IMutationOptions, IStateOptions} from '@/StoreModule/annotations';
+import {IActionOptions, IGetterOptions, IMutationOptions, IStateOptions} from './annotations';
 
 export type getterMiddlewareType = (options :IGetterOptions | undefined, target: any, propertyKey: string, descriptor: PropertyDescriptor) => any
 export type stateMiddlewareType = (options :IStateOptions| undefined, target: any, propertyKey: string) => any

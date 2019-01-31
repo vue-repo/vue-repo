@@ -37,6 +37,7 @@ export class StoreModule {
   get state (): any {
     return this._vm === undefined ? undefined : this._vm._data._state
   }
+
   private initStateProxies () {
     _forEach(this.getStatePropsNames(), propName => {
       Object.defineProperty(this, propName, {
@@ -86,5 +87,8 @@ export class StoreModule {
       data: {_state: this._state},
       computed: this._getters
     })
+  }
+  public registerStates (...states) {
+    console.error(states)
   }
 }
