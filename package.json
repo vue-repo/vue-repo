@@ -1,6 +1,6 @@
 {
   "name": "@vue-repo/vue-repo",
-  "version": "0.1.6",
+  "version": "0.1.7",
   "scripts": {
     "serve": "vue-cli-service serve",
     "prepublish": "npm run test:unit && npm run build",
