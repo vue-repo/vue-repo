@@ -1,7 +1,7 @@
 import _forEach from 'lodash/forEach';
-import Vue from '../../node_modules/vue';
+import Vue from '../../../node_modules/vue';
 import _uniq from 'lodash/uniq'
-import {CombinedVueInstance} from '../../node_modules/vue/types/vue';
+import {CombinedVueInstance} from '../../../node_modules/vue/types/vue';
 
 
 const GetPropertyDescriptor = (o: object, PropName: string): PropertyDescriptor | undefined => {
